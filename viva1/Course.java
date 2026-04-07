@@ -1,6 +1,6 @@
 package viva1;
 
-/** Represents a generic university course ADT */
+/**Represents a generic university course ADT */
 
 public interface Course {
 

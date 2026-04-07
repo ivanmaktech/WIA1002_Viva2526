@@ -37,9 +37,9 @@ package viva1;
  
         @Override 
         public void printCourseDetails() { 
-            System.out.println("Lecture Course: " + courseTitle + " (" + courseCode + ")"); 
-            System.out.println("  Instructor: " + instructorName); 
-            System.out.println("  Lecture Hours/Week: " + lectureHoursPerWeek); 
-            System.out.println("  Total Workload (Semester): " + calculateTotalWorkload() + " hours"); 
+            System.out.println("Lecture Course: "+courseTitle+" ("+courseCode+")"); 
+            System.out.println("  Instructor: "+instructorName); 
+            System.out.println("  Lecture Hours/Week: "+lectureHoursPerWeek); 
+            System.out.println("  Total Workload (Semester): "+calculateTotalWorkload()+" hours"); 
         } 
     }

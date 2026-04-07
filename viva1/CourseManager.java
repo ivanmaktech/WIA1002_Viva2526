@@ -2,25 +2,29 @@ package viva1;
 
 import java.util.ArrayList;
 
-public class CourseManager<T extends Course> {
+public class CourseManager<T extends Course> { //restricts T to only work with numeric types like Integer, Double or Float
     private ArrayList<T> courses;
 
     public CourseManager() {
         this.courses = new ArrayList<>();
     }
 
-    // Add a course to the manager
+    //Add a course to the manager
     public void addCourse(T course) {
         courses.add(course);
     }
 
-    // Remove a course by its unique course code
+    //Remove a course by its unique course code
     public void removeCourse(String courseCode) {
-        for (int i=0; i < courses.size(); i++) {
+        T removeC = null;
+        for (int i=0; i<courses.size(); i++) {
             if (courses.get(i).getCourseCode().equals(courseCode)) {
-                courses.remove(i);
-                break; // Stop searching after removing (assuming course codes are unique)
+                removeC = courses.get(i);
+                break; //Stop searching after removing (assuming course codes are unique)
             }
+        }
+        if (removeC != null) {
+            courses.remove(removeC);
         }
     }
 
@@ -29,10 +33,10 @@ public class CourseManager<T extends Course> {
             return null;
         }
         
-        // Initialize the highest workload course as the first course in the list
+        //Initialize the highest workload course as the first course in the list
         T highest = courses.get(0);
 
-        // If one of the courses has a higher workload than the current highest workload, update the highest variable
+        //If one of the courses has a higher workload than the current highest workload, update the highest variable
         for (T course : courses) {
             if (course.calculateTotalWorkload() > highest.calculateTotalWorkload()) {
                 highest = course;
@@ -42,16 +46,16 @@ public class CourseManager<T extends Course> {
     }
 
     public void sortCoursesByWorkload() {
-        // Use bubble sort method 
+        //Use bubble sort method 
         int n = courses.size();
     
-        for (int i=0; i < n-1; i++) {
+        for (int i=0; i<n-1; i++) {
 
-            for (int j=0; j < n-i-1; j++) {
+            for (int j=0; j<n-i-1; j++) {
                 int workload1 = courses.get(j).calculateTotalWorkload();
-                int workload2 = courses.get(j + 1).calculateTotalWorkload();
+                int workload2 = courses.get(j+1).calculateTotalWorkload();
                 
-                // Swap them if the current course (workload1) has a higher workload than the next one (workload2)
+                //Swap them if the current course (workload1) has a higher workload than the next one (workload2)
                 if (workload1 > workload2) {
                     T temp = courses.get(j);
                     courses.set(j, courses.get(j + 1));

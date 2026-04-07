@@ -6,7 +6,7 @@ public class LabCourse implements Course {
     private String instructorName;
     private double labHoursPerWeek;
     private int numberOfSessions;
-
+ 
     public LabCourse(String courseCode, String courseTitle, String instructorName, double labHoursPerWeek, int numberOfSessions) {
         this.courseCode = courseCode;
         this.courseTitle = courseTitle;
@@ -25,7 +25,7 @@ public class LabCourse implements Course {
         return courseTitle;
     }
 
-    // Task 4
+    //Task 4
     @Override
     public String getInstructorName() {
         return instructorName;
@@ -33,7 +33,7 @@ public class LabCourse implements Course {
 
     @Override
     public int calculateTotalWorkload() {
-        return (int) (labHoursPerWeek * numberOfSessions * 14);
+        return (int) (labHoursPerWeek*numberOfSessions*14);
     }
 
     @Override
