@@ -2,7 +2,7 @@ package viva1;
 
 import java.util.ArrayList;
 
-public class CourseManager<T extends Course> { //restricts T to only work with numeric types like Integer, Double or Float
+public class CourseManager<T extends Course> { //restricts T to only work with Course types
     private ArrayList<T> courses;
 
     public CourseManager() {
