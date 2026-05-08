@@ -3,7 +3,7 @@ package viva2;
 import java.util.Scanner;
 
 public class GroceryStoreSystem {
-    private static final String FILENAME = "inventory.txt";
+    private static final String FILENAME = "viva2/inventory.txt";
     private static InventoryManager inventory = new InventoryManager();
     private static CartList cart = new CartList();
     private static Scanner scanner = new Scanner(System.in);
