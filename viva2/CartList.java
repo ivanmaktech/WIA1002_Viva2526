@@ -72,12 +72,12 @@ public class CartList {
                 //Restore stock
                 current.product.setStock(current.product.getStock() + current.quantity);
 
-                if (prev == null) {
+                if (prev == null) { // Removing head
                     head = current.next;
-                } else {
+                } else { // Removing middle or tail
                     prev.next = current.next;
                 }
-                if (current == tail) {
+                if (current == tail) { // 1 item case
                     tail = prev;
                 }
                 size--;
