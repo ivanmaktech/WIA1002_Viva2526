@@ -1,117 +1,166 @@
 package viva2;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.io.*;
-import java.util.Scanner;
 
 public class InventoryManager {
-    private ArrayList<Product> inventory;
-
-    public InventoryManager() {
-        this.inventory = new ArrayList<>();
-    }
+    private final ArrayList<Product> items = new ArrayList<>();
 
     public void loadFromFile(String filename) {
-        inventory.clear();
-        try (Scanner fileScanner = new Scanner(new File(filename))) {
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine().trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split(",");
-                if (parts.length == 4) {
+        items.clear();
+        File file = new File(filename);
+        if (!file.exists()) {
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+
+                // Expected: ID,Name,Price,Stock
+                String[] parts = line.split(",", 4);
+                if (parts.length != 4) {
+                    continue;
+                }
+
+                try {
                     int id = Integer.parseInt(parts[0].trim());
                     String name = parts[1].trim();
                     double price = Double.parseDouble(parts[2].trim());
                     int stock = Integer.parseInt(parts[3].trim());
-                    inventory.add(new Product(id, name, price, stock));
+
+                    // Ignore duplicates (keep first occurrence)
+                    if (searchById(id) == null) {
+                        items.add(new Product(id, name, price, stock));
+                    }
+                } catch (NumberFormatException ignored) {
+                    // Skip invalid line
                 }
             }
-            System.out.println("Inventory loaded successfully.");
-        } catch (FileNotFoundException e) {
-            System.out.println("inventory.txt not found. Starting with an empty inventory.");
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println("Error reading inventory file: " + e.getMessage());
         }
     }
 
     public void saveToFile(String filename) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            for (Product p : inventory) {
-                writer.println(p.getId() + "," + p.getName() + "," + p.getPrice() + "," + p.getStock());
+        File file = new File(filename);
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
+            for (Product p : items) {
+                writer.write(p.getId() + "," + p.getName() + "," + p.getPrice() + "," + p.getStock());
+                writer.newLine();
             }
-            System.out.println("Inventory saved successfully.");
         } catch (IOException e) {
-            System.out.println("Error saving inventory: " + e.getMessage());
+            System.out.println("Error writing inventory file: " + e.getMessage());
         }
     }
 
-    public void addProduct(Product p) {
+    public boolean addProduct(Product p) {
+        if (p == null) {
+            return false;
+        }
         if (searchById(p.getId()) != null) {
-            System.out.println("Error: Product with ID " + p.getId() + " already exists.");
-        } else {
-            inventory.add(p);
-            System.out.println("Product added successfully.");
+            return false;
         }
+        items.add(p);
+        return true;
     }
 
-    public void removeProduct(int id) {
-        Product p = searchById(id);
-        if (p != null) {
-            inventory.remove(p);
-            System.out.println("Product removed successfully.");
-        } else {
-            System.out.println("Error: Product not found.");
+    public boolean removeProduct(int id) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getId() == id) {
+                items.remove(i);
+                return true;
+            }
         }
+        return false;
     }
 
     public Product searchById(int id) {
-        for (Product p : inventory) {
-            if (p.getId() == id) return p;
-        }
-        return null;
-    }
-
-    public ArrayList<Product> searchByName(String name) {
-        ArrayList<Product> results = new ArrayList<>();
-        String lowerName = name.toLowerCase();
-        for (Product p : inventory) {
-            if (p.getName().toLowerCase().contains(lowerName)) {
-                results.add(p);
+        for (Product p : items) {
+            if (p.getId() == id) {
+                return p;
             }
         }
-        return results;
-    }
-
-    public void updateStock(int id, int newStock) {
-        Product p = searchById(id);
-        if (p != null) {
-            p.setStock(newStock);
-            System.out.println("Stock updated successfully.");
-        } else {
-            System.out.println("Error: Product not found.");
-        }
-    }
-
-    public void displayAll() {
-        if (inventory.isEmpty()) {
-            System.out.println("Inventory is empty.");
-            return;
-        }
-        System.out.println("---------------------------------------------------------------");
-        System.out.printf("%-5s | %-15s | %-10s | %-5s\n", "ID", "Name", "Price", "Stock");
-        System.out.println("---------------------------------------------------------------");
-        for (Product p : inventory) {
-            System.out.printf("%-5d | %-15s | RM%-8.2f | %-5d\n", p.getId(), p.getName(), p.getPrice(), p.getStock());
-        }
-        System.out.println("---------------------------------------------------------------");
+        return null;
     }
 
     public Product getProductById(int id) {
         return searchById(id);
     }
 
+    public ArrayList<Product> searchByName(String nameQuery) {
+        ArrayList<Product> result = new ArrayList<>();
+        if (nameQuery == null) {
+            return result;
+        }
+        String q = nameQuery.trim().toLowerCase();
+        if (q.isEmpty()) {
+            return result;
+        }
+        for (Product p : items) {
+            String n = p.getName() == null ? "" : p.getName().toLowerCase();
+            if (n.contains(q)) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    public boolean updateStock(int id, int newStock) {
+        Product p = searchById(id);
+        if (p == null) {
+            return false;
+        }
+        if (newStock < 0) {
+            return false;
+        }
+        p.setStock(newStock);
+        return true;
+    }
+
+    // PDF spec name
     public boolean isAvailable(int id, int requestedQty) {
+        if (requestedQty <= 0) {
+            return false;
+        }
         Product p = searchById(id);
         return p != null && p.getStock() >= requestedQty;
+    }
+
+    // Backwards-compatible alias (if you called it elsewhere)
+    public boolean isavailable(int id, int quantity) {
+        return isAvailable(id, quantity);
+    }
+
+    public void displayAll() {
+        if (items.isEmpty()) {
+            System.out.println("Inventory is empty.");
+            return;
+        }
+
+        System.out.println("\n=== Inventory ===");
+        System.out.printf("%-8s %-25s %-10s %-10s%n", "ID", "Name", "Price", "Stock");
+        System.out.println("-----------------------------------------------------------");
+        for (Product p : items) {
+            System.out.printf("%-8d %-25s %-10.2f %-10d%n", p.getId(), p.getName(), p.getPrice(), p.getStock());
+        }
+    }
+
+    public int size() {
+        return items.size();
     }
 }
